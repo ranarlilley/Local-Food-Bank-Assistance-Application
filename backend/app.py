@@ -10,28 +10,28 @@ from sqlalchemy.orm import joinedload
 from werkzeug.exceptions import HTTPException
 from sqlalchemy import inspect
 
-# Initialize Flask app
+#we will initialize the Flask app
 app = Flask(__name__)
 app.secret_key = os.getenv('SECRET_KEY', 'your-secret-key-123')
 app.config['PERMANENT_SESSION_LIFETIME'] = 3600
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 app.config['SESSION_COOKIE_SECURE'] = False  # Set to True in production with HTTPS
 
-# Setup CORS
+#our cors setup
 CORS(
     app,
     resources={r"/api/*": {"origins": "http://localhost:5173"}},
     supports_credentials=True
 )
 
-# Database setup
+#our database setup
 db_path = os.path.join(os.path.dirname(__file__), "instance", "foodbank.db")
 app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{db_path}'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
 
-# Models
+#our models
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     first_name = db.Column(db.String(50), nullable=False)
@@ -71,7 +71,7 @@ class Notification(db.Model):
     user = db.relationship('User', foreign_keys=[user_id])
 
 
-# Error handler
+#for error issues
 @app.errorhandler(Exception)
 def handle_exception(e):
     if isinstance(e, HTTPException):
@@ -82,7 +82,7 @@ def handle_exception(e):
     }), 500)
 
 
-# Decorator for role-based access control
+#we will add a decorator for role-based access control
 def role_required(role):
     def decorator(f):
         @wraps(f)
@@ -101,7 +101,7 @@ def role_required(role):
     return decorator
 
 
-# Helper functions
+
 def is_valid_name(name):
     return isinstance(name, str) and 2 <= len(name) <= 50
 
@@ -163,10 +163,10 @@ def register():
     db.session.add(new_user)
     db.session.commit()
 
-    # Add welcome notification for new user
+    #we will add welcome notification for new user
     welcome_notification = Notification(
         user_id=new_user.id,
-        message=f"Welcome to the Food Bank App! Your account has been created successfully."
+        message=f"Welcome to the Local Food Bank Assistance App! Your account has been created successfully."
     )
     db.session.add(welcome_notification)
 
@@ -234,17 +234,17 @@ def upgrade_to_vip():
     if not user:
         return jsonify({'error': 'User not found'}), 404
 
-    # Simple mock payment - in a real app, this would integrate with Stripe/PayPal
+    #we will use a mock payment feature- as real paypal integration is not needed
     user.is_vip = True
 
-    # Add notification for the user
+
     user_notification = Notification(
         user_id=user.id,
         message="Congratulations! You are now a VIP member."
     )
     db.session.add(user_notification)
 
-    # Add notification for admin users
+    #we can add notifications for admin user Sami
     admin_users = User.query.filter_by(role='admin').all()
     for admin in admin_users:
         admin_notification = Notification(
@@ -275,7 +275,7 @@ def request_food():
     user = User.query.get(user_id)
     print(f"Creating food request for user {user.first_name} {user.last_name} (ID: {user_id})")
 
-    # Check if any food items were selected
+    #we can check if any food items were selected
     has_items = False
     for category, items in data.items():
         if items and len(items) > 0:
@@ -303,7 +303,7 @@ def request_food():
                 db.session.add(food_item)
                 print(f"Added {item['name']} to request")
 
-    # Add notification for donor users
+    #we will add notifications for donor users
     donor_users = User.query.filter_by(role='donor').all()
     for donor in donor_users:
         donor_notification = Notification(
@@ -312,7 +312,7 @@ def request_food():
         )
         db.session.add(donor_notification)
 
-    # Add notification for admin users
+    #we will add notifications for admin user Sami
     admin_users = User.query.filter_by(role='admin').all()
     for admin in admin_users:
         admin_notification = Notification(
@@ -333,17 +333,17 @@ def get_requests():
     # Most basic approach possible
     print("Donor is requesting available food requests")
 
-    # Get ALL requests from the database
+    #we will get all requests from the database
     all_requests = Request.query.all()
     print(f"Found {len(all_requests)} total requests in database")
 
     result = []
     for req in all_requests:
-        # Check if request is not claimed
+
         if req.claimed_by is None:
             print(f"Request {req.id} is not claimed, status: {req.status}")
 
-            # Get user info
+            #we will get user info
             user = User.query.get(req.user_id)
             if not user:
                 print(f"Warning: Request {req.id} has invalid user_id {req.user_id}")
@@ -415,14 +415,14 @@ def approve_request(request_id):
 
     req.status = 'approved'
 
-    # Add notification for recipient
+    #we will add notifications for recipient
     recipient_notification = Notification(
         user_id=req.user_id,
         message=f"Your food request has been approved by an admin."
     )
     db.session.add(recipient_notification)
 
-    # Add notification for donors
+    #we will add notifications for donors
     donor_users = User.query.filter_by(role='donor').all()
     for donor in donor_users:
         donor_notification = Notification(
@@ -442,17 +442,17 @@ def decline_request(request_id):
     if not req:
         return jsonify({'error': 'Request not found'}), 404
 
-    # Add notification for recipient before deleting request
+    #we can add notification for recipient before deleting request
     recipient_notification = Notification(
         user_id=req.user_id,
         message=f"Your food request has been declined by an admin."
     )
     db.session.add(recipient_notification)
 
-    # Delete related food items first
+
     FoodItem.query.filter_by(request_id=req.id).delete()
 
-    # Then delete the request
+    #so we can delete the request
     db.session.delete(req)
     db.session.commit()
     return jsonify({'message': 'Request declined successfully'}), 200
@@ -514,7 +514,7 @@ def claim_request(request_id):
     if req.claimed_by:
         return jsonify({'error': 'Request already claimed by another donor'}), 400
 
-    # Fixed: Allow claiming both pending AND approved requests
+    #we will allow pending and approved requests to be claimed
     if req.status not in ['pending', 'approved']:
         return jsonify({'error': 'Only pending or approved requests can be claimed'}), 400
 
@@ -522,7 +522,7 @@ def claim_request(request_id):
     req.claimed_at = datetime.utcnow()
     req.status = 'claimed'
 
-    # Add notification for recipient
+    #we will add notifications for our recipient
     donor = User.query.get(donor_id)
     recipient_notification = Notification(
         user_id=req.user_id,
@@ -530,7 +530,7 @@ def claim_request(request_id):
     )
     db.session.add(recipient_notification)
 
-    # Add notification for admin
+    #we will add notifications for our admin Sami
     admin_users = User.query.filter_by(role='admin').all()
     for admin in admin_users:
         admin_notification = Notification(
@@ -568,13 +568,13 @@ def mark_notifications_read():
     notification_id = request.json.get('notification_id')
 
     if notification_id:
-        # Mark specific notification as read
+
         notification = Notification.query.filter_by(id=notification_id, user_id=user_id).first()
         if notification:
             notification.is_read = True
             db.session.commit()
     else:
-        # Mark all notifications as read
+        #we need to insure all notifications show read
         notifications = Notification.query.filter_by(user_id=user_id, is_read=False).all()
         for notification in notifications:
             notification.is_read = True
@@ -624,7 +624,7 @@ def debug_db_info():
     })
 
 
-# Initialize database
+#we will initialize database
 with app.app_context():
     Path("instance").mkdir(exist_ok=True)
     db.create_all()

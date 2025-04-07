@@ -1,11 +1,11 @@
 from backend.app import app, db, User
 
 with app.app_context():
-    # Find Sami's account
+    #we will find Sami's account
     user = User.query.filter_by(username='sami meyer').first()
 
     if user:
-        # Make them admin
+        #making Sami an admin
         user.role = 'admin'
         db.session.commit()
         print("Sami Meyer is now an admin!")

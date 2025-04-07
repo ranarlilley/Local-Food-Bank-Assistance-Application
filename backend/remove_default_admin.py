@@ -1,7 +1,7 @@
 from backend.app import app, db, User
 
 with app.app_context():
-    # Find the default admin account
+    #we will find default admin account
     default_admin = User.query.filter_by(username='admin').first()
 
     if default_admin:
