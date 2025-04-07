@@ -10,6 +10,7 @@ from sqlalchemy.orm import joinedload
 from werkzeug.exceptions import HTTPException
 from sqlalchemy import inspect
 
+
 #we will initialize the Flask app
 app = Flask(__name__)
 app.secret_key = os.getenv('SECRET_KEY', 'your-secret-key-123')
@@ -20,10 +21,9 @@ app.config['SESSION_COOKIE_SECURE'] = False  # Set to True in production with HT
 #our cors setup
 CORS(
     app,
-    resources={r"/api/*": {"origins": "http://localhost:5173"}},
+    resources={r"/api/*": {"origins": ["http://localhost:5173", "https://local-food-bank-assistance-app.herokuapp.com"]}},
     supports_credentials=True
 )
-
 #our database setup
 db_path = os.path.join(os.path.dirname(__file__), "instance", "foodbank.db")
 app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{db_path}'
