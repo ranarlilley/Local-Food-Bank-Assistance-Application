@@ -1,0 +1,24 @@
+### Get Homepage
+GET http://127.0.0.1:5001/
+
+### Login
+POST http://127.0.0.1:5001/api/login
+Content-Type: application/json
+
+{
+  "first_name": "Fresh",
+  "last_name": "Start",
+  "password": "789123"
+}
+
+### Request Food (requires login)
+POST http://127.0.0.1:5001/api/request-food
+Content-Type: application/json
+
+{
+  "meats": ["chicken"],
+  "vegetables": ["carrots"],
+  "fruits": ["apples"],
+  "grains": ["rice"]
+}
+
