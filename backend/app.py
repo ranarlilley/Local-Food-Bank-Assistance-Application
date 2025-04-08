@@ -19,9 +19,14 @@ app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 app.config['SESSION_COOKIE_SECURE'] = False  # Set to True in production with HTTPS
 
 #our cors setup
+
 CORS(
     app,
-    resources={r"/api/*": {"origins": ["http://localhost:5173", "https://local-food-bank-assistance-app.herokuapp.com"]}},
+    resources={r"/api/*": {"origins": [
+        "http://localhost:5173",
+        "https://local-food-bank-assistance-app.herokuapp.com",
+        "https://lucky-lamington-1db512.netlify.app"
+    ]}},
     supports_credentials=True
 )
 #our database setup
