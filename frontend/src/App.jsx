@@ -1,6 +1,9 @@
 import { useState, useEffect } from 'react';
 import './App.css';
 
+// Add this line to import the API URL from environment variables
+const API_URL = import.meta.env.VITE_API_URL || '';
+
 function App() {
   const [loggedIn, setLoggedIn] = useState(false);
   const [showRegister, setShowRegister] = useState(false);
@@ -27,13 +30,13 @@ function App() {
       try {
         if (user?.role === 'donor') {
           const [pendingRes, claimedRes] = await Promise.all([
-            fetch('/api/requests', {
+            fetch(`${API_URL}/api/requests`, {
               credentials: 'include',
               headers: {
                 'Accept': 'application/json'
               }
             }),
-            fetch('/api/my-claimed-requests', {
+            fetch(`${API_URL}/api/my-claimed-requests`, {
               credentials: 'include',
               headers: {
                 'Accept': 'application/json'
@@ -44,7 +47,7 @@ function App() {
           if (claimedRes.ok) setMyClaimedRequests(await claimedRes.json());
         }
         else if (user?.role === 'recipient') {
-          const res = await fetch('/api/my-requests', {
+          const res = await fetch(`${API_URL}/api/my-requests`, {
             credentials: 'include',
             headers: {
               'Accept': 'application/json'
@@ -54,13 +57,13 @@ function App() {
         }
         else if (user?.role === 'admin') {
           const [usersRes, requestsRes] = await Promise.all([
-            fetch('/api/admin/users', {
+            fetch(`${API_URL}/api/admin/users`, {
               credentials: 'include',
               headers: {
                 'Accept': 'application/json'
               }
             }),
-            fetch('/api/admin/requests', {
+            fetch(`${API_URL}/api/admin/requests`, {
               credentials: 'include',
               headers: {
                 'Accept': 'application/json'
@@ -92,7 +95,7 @@ function App() {
 
   const fetchNotifications = async () => {
     try {
-      const response = await fetch('/api/notifications', {
+      const response = await fetch(`${API_URL}/api/notifications`, {
         credentials: 'include',
         headers: {
           'Accept': 'application/json'
@@ -111,7 +114,7 @@ function App() {
 
   const markAsRead = async (notificationId = null) => {
     try {
-      const response = await fetch('/api/notifications/mark-read', {
+      const response = await fetch(`${API_URL}/api/notifications/mark-read`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -145,7 +148,7 @@ function App() {
     setError('');
 
     try {
-      const response = await fetch('/api/login', {
+      const response = await fetch(`${API_URL}/api/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -187,7 +190,7 @@ function App() {
     }
 
     try {
-      const response = await fetch('/api/register', {
+      const response = await fetch(`${API_URL}/api/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -222,7 +225,7 @@ function App() {
   const handleLogout = async () => {
     setLoading(true);
     try {
-      await fetch('/api/logout', {
+      await fetch(`${API_URL}/api/logout`, {
         method: 'POST',
         credentials: 'include',
         headers: {
@@ -249,7 +252,7 @@ function App() {
     setError('');
 
     try {
-      const response = await fetch('/api/upgrade-to-vip', {
+      const response = await fetch(`${API_URL}/api/upgrade-to-vip`, {
         method: 'POST',
         credentials: 'include',
         headers: {
@@ -278,7 +281,7 @@ function App() {
 
     setLoading(true);
     try {
-      const response = await fetch(`/api/claim-request/${requestId}`, {
+      const response = await fetch(`${API_URL}/api/claim-request/${requestId}`, {
         method: 'POST',
         credentials: 'include',
         headers: {
@@ -291,7 +294,7 @@ function App() {
         setRequests(requests.filter(req => req.id !== requestId));
 
         // Fetch updated claimed requests
-        const claimedRes = await fetch('/api/my-claimed-requests', {
+        const claimedRes = await fetch(`${API_URL}/api/my-claimed-requests`, {
           credentials: 'include',
           headers: {
             'Accept': 'application/json'
@@ -320,7 +323,7 @@ function App() {
 
     setLoading(true);
     try {
-      const response = await fetch(`/api/approve-request/${requestId}`, {
+      const response = await fetch(`${API_URL}/api/approve-request/${requestId}`, {
         method: 'POST',
         credentials: 'include',
         headers: {
@@ -330,7 +333,7 @@ function App() {
 
       if (response.ok) {
         // Refresh the admin requests list
-        const requestsRes = await fetch('/api/admin/requests', {
+        const requestsRes = await fetch(`${API_URL}/api/admin/requests`, {
           credentials: 'include',
           headers: {
             'Accept': 'application/json'
@@ -359,7 +362,7 @@ function App() {
 
     setLoading(true);
     try {
-      const response = await fetch(`/api/decline-request/${requestId}`, {
+      const response = await fetch(`${API_URL}/api/decline-request/${requestId}`, {
         method: 'POST',
         credentials: 'include',
         headers: {
@@ -396,7 +399,7 @@ function App() {
     };
 
     try {
-      const response = await fetch('/api/request-food', {
+      const response = await fetch(`${API_URL}/api/request-food`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -409,7 +412,7 @@ function App() {
       if (response.ok) {
         e.target.reset();
         showSuccess('Food request submitted successfully!');
-        const res = await fetch('/api/my-requests', {
+        const res = await fetch(`${API_URL}/api/my-requests`, {
           credentials: 'include',
           headers: {
             'Accept': 'application/json'
@@ -664,7 +667,7 @@ function App() {
               <button
                 onClick={() => {
                   // Force refresh of requests
-                  fetch('/api/requests', {
+                  fetch(`${API_URL}/api/requests`, {
                     credentials: 'include',
                     headers: { 'Accept': 'application/json' }
                   })
